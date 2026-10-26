@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Saree Cutting & Table Planner</title>
+<meta name="description" content="Plan saree and blouse-piece cutting on a printing table. કાપડ કટીંગ અને ટેબલ પ્લાનિંગ.">
+<meta name="theme-color" content="#23246b" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#12132e" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Saree Planner">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+  --bg:#f3f4f9; --surface:#ffffff; --surface-2:#eceefa; --line:#d9dcef;
+  --ink:#191a3d; --ink-2:#55587e;
+  --indigo:#23246b; --indigo-soft:#e3e4f7;
+  --marigold:#e89b00; --marigold-ink:#3a2600; --marigold-soft:#fff1d1;
+  --saree:#3b3fb3; --bp:#0f8a7a; --idle:#c9ccdf; --scrap:#c2410c; --scrap-soft:#fde5d8;
+  --ok:#0f8a7a;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#12132e; --surface:#1b1d42; --surface-2:#24275a; --line:#33377a;
+    --ink:#eef0ff; --ink-2:#a9acd6;
+    --indigo:#c9ccff; --indigo-soft:#2a2d66;
+    --marigold:#ffb627; --marigold-ink:#2a1b00; --marigold-soft:#3a2d10;
+    --saree:#8a8ff5; --bp:#3cc9b4; --idle:#3c4078; --scrap:#ff8a5c; --scrap-soft:#3d2219;
+    --ok:#3cc9b4;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#12132e; --surface:#1b1d42; --surface-2:#24275a; --line:#33377a;
+  --ink:#eef0ff; --ink-2:#a9acd6;
+  --indigo:#c9ccff; --indigo-soft:#2a2d66;
+  --marigold:#ffb627; --marigold-ink:#2a1b00; --marigold-soft:#3a2d10;
+  --saree:#8a8ff5; --bp:#3cc9b4; --idle:#3c4078; --scrap:#ff8a5c; --scrap-soft:#3d2219;
+  --ok:#3cc9b4;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hind Vadodara","Noto Sans Gujarati","Shruti",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
+.wrap{max-width:1080px;margin:0 auto;padding:16px 16px 48px}
+.gu{display:block;font-size:.8em;color:var(--ink-2);font-weight:500}
+h1,h2,h3{margin:0;line-height:1.2}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 20px}
+header.top h1{font-size:clamp(1.35rem,3.6vw,1.9rem);color:var(--indigo);font-weight:700;letter-spacing:-.01em}
+.btn{font:inherit;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;cursor:pointer;font-weight:600;min-height:44px}
+.btn:focus-visible,.tab:focus-visible,input:focus-visible,.chip:focus-visible{outline:3px solid var(--marigold);outline-offset:2px}
+.layout{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){.layout{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+.panel h2{font-size:1.1rem;font-weight:700;margin-bottom:12px}
+aside.panel{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+@media (max-width:860px){aside.panel{position:static}}
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px}
+.chip{font:inherit;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:10px;padding:6px 2px;cursor:pointer;font-weight:600;font-size:.9rem;min-height:44px}
+.chip[aria-pressed="true"]{background:var(--marigold);color:var(--marigold-ink);border-color:var(--marigold)}
+.field{margin-bottom:12px}
+.field label{display:block;font-weight:600;font-size:.92rem;margin-bottom:4px}
+.field label .gu{display:inline;margin-left:6px}
+.input-wrap{position:relative}
+.input-wrap input{width:100%;font:inherit;font-size:1.15rem;font-weight:600;padding:10px 44px 10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-height:48px}
+.input-wrap span{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--ink-2);font-weight:600}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.err{color:var(--scrap);font-weight:600;font-size:.9rem;min-height:1.2em}
+.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.actions .btn{display:inline-flex;align-items:center;gap:6px;line-height:1.15;text-align:left}
+dialog#shareBox{width:min(560px,94vw);border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);padding:18px}
+dialog#shareBox::backdrop{background:rgba(10,10,40,.55)}
+dialog#shareBox h2{font-size:1.1rem;margin-bottom:10px}
+#shareText{width:100%;font:inherit;font-size:.9rem;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px;resize:vertical}
+a.btn{text-decoration:none}
+.btn.wa{background:#1fa855;border-color:#1fa855;color:#fff}
+.btn.wa .gu{color:#e6fff0}
+@media (max-width:560px){header.top{flex-direction:column;align-items:stretch}.actions{justify-content:stretch}.actions .btn{flex:1;justify-content:center}}
+.strats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}
+.strat{font:inherit;text-align:left;display:flex;gap:10px;align-items:flex-start;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700;min-height:56px;line-height:1.25}
+.strat .ic{font-size:1.3rem;line-height:1}
+.strat[aria-checked="true"]{border-color:var(--marigold);background:var(--marigold-soft)}
+.strat:focus-visible{outline:3px solid var(--marigold);outline-offset:2px}
+.sub{font-size:1rem;margin:18px 0 8px}
+.note.warn{border-left-color:var(--scrap)}
+.t-saree{color:var(--saree)}.t-bp{color:var(--bp)}.t-scrap{color:var(--scrap)}
+span.better{color:var(--ok);font-weight:700}span.worse{color:var(--scrap);font-weight:700}
+th .gu{font-size:.78rem;font-weight:500}
+.legend .gu{font-size:.78rem}
+.stat small .gu{font-size:.85em}
+.steps li .gu{font-size:.92em}
+@media (max-width:560px){.cards td.blank{display:none}}
+.tabs{display:flex;gap:6px;background:var(--surface-2);padding:5px;border-radius:12px;margin-bottom:16px}
+.tab{flex:1;font:inherit;border:0;background:transparent;color:var(--ink-2);padding:10px 8px;border-radius:9px;cursor:pointer;font-weight:700;min-height:48px;line-height:1.2}
+.tab .gu{font-size:.75rem}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--indigo);box-shadow:0 1px 0 var(--line)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--surface-2);border-radius:12px;padding:12px}
+.stat b{display:block;font-size:1.9rem;line-height:1.1;font-weight:700;font-variant-numeric:tabular-nums}
+.stat small{color:var(--ink-2);font-weight:600}
+.stat.saree b{color:var(--saree)} .stat.bp b{color:var(--bp)} .stat.scrap b{color:var(--scrap)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:4px 0 12px;padding:0;list-style:none;font-size:.9rem;font-weight:600}
+.legend li{display:flex;align-items:center;gap:6px}
+.sw{width:16px;height:16px;border-radius:4px;display:inline-block}
+.sw.saree{background:var(--saree)} .sw.bp{background:var(--bp)} .sw.idle{background:var(--idle)} .sw.scrap{background:var(--scrap)}
+/* The table strip: each run drawn to scale like a measuring tape */
+.runs{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.times{display:block;font-size:1.25rem;font-weight:700;color:var(--ink);line-height:1.1}
+.run-row{display:grid;grid-template-columns:84px 1fr;gap:10px;align-items:center}
+.run-row .lbl{font-weight:700;font-size:.85rem;color:var(--ink-2);line-height:1.15}
+.strip{display:flex;height:34px;border-radius:6px;overflow:hidden;background:var(--idle);border:1px solid var(--line)}
+.seg{height:100%;border-right:2px solid var(--surface);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.72rem;font-weight:700;min-width:0;overflow:hidden;white-space:nowrap}
+.seg.saree{background:var(--saree)} .seg.bp{background:var(--bp)}
+.scale{display:flex;justify-content:space-between;font-size:.75rem;color:var(--ink-2);margin:-4px 0 14px 94px;font-variant-numeric:tabular-nums}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{background:var(--surface-2);font-size:.85rem;color:var(--ink-2);font-weight:700}
+tbody tr:last-child td{border-bottom:0}
+tfoot td{font-weight:700;background:var(--indigo-soft);border-bottom:0}
+td.c-saree{color:var(--saree);font-weight:700} td.c-bp{color:var(--bp);font-weight:700} td.c-scrap{color:var(--scrap);font-weight:700}
+/* Mobile: table rows become cards */
+@media (max-width:560px){
+  .tbl-wrap.cards{border:0;overflow:visible}
+  .cards table,.cards tbody,.cards tr,.cards td,.cards tfoot{display:block;width:100%}
+  .cards thead{display:none}
+  .cards tr{border:1px solid var(--line);border-radius:12px;margin-bottom:8px;padding:6px 12px;background:var(--surface)}
+  .cards td{display:flex;justify-content:space-between;gap:12px;border:0;padding:5px 0;text-align:right}
+  .cards td::before{content:attr(data-label);color:var(--ink-2);font-weight:600;text-align:left}
+  .cards tfoot tr{background:var(--indigo-soft)}
+}
+.steps{margin:16px 0 0;padding-left:1.4em}
+.steps li{margin-bottom:8px}
+.steps li.scrap{color:var(--scrap);font-weight:600}
+section.analysis{margin-top:20px}
+.badge{display:inline-block;background:var(--marigold-soft);color:var(--ink);border:1px solid var(--marigold);border-radius:999px;padding:2px 10px;font-size:.8rem;font-weight:700;margin-left:6px;vertical-align:middle}
+.note{background:var(--surface-2);border-left:4px solid var(--marigold);border-radius:8px;padding:12px 14px;margin:12px 0;font-size:.95rem}
+.note p{margin:0 0 6px}.note p:last-child{margin:0}
+tr.current td{background:var(--marigold-soft)}
+td.better{color:var(--ok);font-weight:700} td.worse{color:var(--scrap);font-weight:700}
+.muted{color:var(--ink-2);font-size:.9rem}
+@media print{
+  header.top .btn,aside.panel,.strats,section.analysis{display:none!important}
+  .layout{display:block} body{background:#fff;color:#000} .panel{border:0;padding:0}
+}
+@media (prefers-reduced-motion:no-preference){.seg{transition:flex-basis .25s ease}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Saree cutting planner<span class="gu">કાપડ કટીંગ અને ટેબલ પ્લાનિંગ</span></h1>
+    <div class="actions">
+      <button class="btn wa" id="waBtn" type="button"><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.1 5.1 0 0 0 1.1 2.7 11.7 11.7 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.5-.3Z"/></svg><span>WhatsApp<span class="gu">શેર કરો</span></span></button>
+      <button class="btn" id="themeBtn" type="button" aria-label="Switch light or dark mode"></button>
+      <button class="btn" type="button" onclick="window.print()">Print slip<span class="gu">સ્લીપ પ્રિન્ટ</span></button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="panel" aria-label="Inputs">
+      <h2>Roll and cut sizes<span class="gu">તાકો અને કટ માપ (મીટરમાં)</span></h2>
+      <div class="chips" role="group" aria-label="Quick thaan presets">
+        <button class="chip" data-v="112" type="button">112 m</button>
+        <button class="chip" data-v="500" type="button">500 m</button>
+        <button class="chip" data-v="1000" type="button">1000 m</button>
+        <button class="chip" data-v="6697" type="button">6697 m</button>
+      </div>
+      <div class="field"><label for="total">Total fabric<span class="gu">કુલ કાપડ</span></label>
+        <div class="input-wrap"><input id="total" type="number" inputmode="decimal" step="0.01" min="0" value="112"><span>m</span></div></div>
+      <div class="field"><label for="table">Printing table<span class="gu">ટેબલ લંબાઈ</span></label>
+        <div class="input-wrap"><input id="table" type="number" inputmode="decimal" step="0.01" min="0" value="38.5"><span>m</span></div></div>
+      <div class="grid2">
+        <div class="field" id="f-saree"><label for="saree">Saree cut<span class="gu">સાડી</span></label>
+          <div class="input-wrap"><input id="saree" type="number" inputmode="decimal" step="0.01" min="0" value="5.50"><span>m</span></div></div>
+        <div class="field" id="f-bp"><label for="bp">Blouse cut<span class="gu">બ્લાઉઝ</span></label>
+          <div class="input-wrap"><input id="bp" type="number" inputmode="decimal" step="0.01" min="0" value="0.82"><span>m</span></div></div>
+      </div>
+      <div class="field" id="f-target" hidden><label for="target">Blouse pieces wanted<span class="gu">જોઈતા બ્લાઉઝ નંગ</span></label>
+        <div class="input-wrap"><input id="target" type="number" inputmode="numeric" step="1" min="0" value="10"><span>pcs</span></div></div>
+      <p class="err" id="err" role="alert"></p>
+      <p class="muted">All lengths are in metres. Results update as you type.<span class="gu">બધા માપ મીટરમાં. લખતાં જ જવાબ બદલાય છે.</span></p>
+    </aside>
+
+    <main>
+      <div class="panel" style="margin-bottom:16px">
+        <h2 id="st-h">Calculation strategy<span class="gu">ગણતરીની પદ્ધતિ પસંદ કરો</span></h2>
+        <div class="strats" id="strats" role="radiogroup" aria-labelledby="st-h"></div>
+      </div>
+
+      <section class="panel" id="plan" role="tabpanel" aria-live="polite"></section>
+
+      <section class="panel analysis" aria-labelledby="an-h">
+        <h2 id="an-h">Saree length review: ±0.20 m<span class="badge">Suggestion only · ફક્ત સૂચન</span><span class="gu">સાડી લંબાઈ ±0.20 મીટર સરખામણી</span></h2>
+        <p class="muted">The plan above always uses your saree cut exactly as entered. This only compares 0.20 m shorter and longer.<span class="gu">ઉપરનો પ્લાન તમારા લખેલા માપથી જ બને છે. અહીં ફક્ત 0.20 મી. ટૂંકું/લાંબું કરવાથી શું ફેર પડે તે બતાવ્યું છે.</span></p>
+        <div id="analysis"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<dialog id="shareBox" aria-labelledby="shareH">
+  <h2 id="shareH">Share plan<span class="gu">પ્લાન શેર કરો</span></h2>
+  <textarea id="shareText" readonly rows="12"></textarea>
+  <p class="err" id="copyMsg" style="color:var(--ok)" role="status"></p>
+  <div class="actions">
+    <button class="btn wa" id="copyBtn" type="button">📋 Copy text<span class="gu">ટેક્સ્ટ કૉપી કરો</span></button>
+    <a class="btn" id="waApp" href="#" target="_top" rel="noopener">Open WhatsApp app<span class="gu">WhatsApp ખોલો</span></a>
+    <a class="btn" id="waWeb" href="#" target="_blank" rel="noopener">WhatsApp Web<span class="gu">વેબ પર ખોલો</span></a>
+    <button class="btn" id="closeShare" type="button">Close<span class="gu">બંધ કરો</span></button>
+  </div>
+</dialog>
+<script>
+/* ================= Calculation core =================
+   Shared rules (from the original calculator):
+   - Sarees per table run = floor(table / sareeCut)
+   - Maths in whole centimetres to avoid floating-point drift
+   Strategies:
+   max    : sarees = floor(total / S); leftover -> floor(leftover / B) blouse pieces (BPs on last run, as before)
+   saree  : sarees = floor(total / S); no blouse pieces
+   equal  : sets = floor(total / (S + B)); sarees = BPs = sets
+   custom : BPs = min(target, floor(total / B)); sarees = floor((total - BPs*B) / S)
+   bponly : BPs = floor(total / B); no sarees                                        */
+const cm = v => Math.round(Number(v) * 100);
+const fmt = c => (c / 100).toFixed(2);
+
+const STRATS = {
+  max:    { en: "Max sarees + leftover BPs", gu: "મહત્તમ સાડી + બાકી બ્લાઉઝ", icon: "🎯", saree: true,  bp: true },
+  saree:  { en: "Saree only",                 gu: "ફક્ત સાડી",                  icon: "🥻", saree: true,  bp: false },
+  equal:  { en: "1:1 equal sets",             gu: "૧:૧ સરખા સેટ: ૧ સાડી + ૧ બ્લાઉઝ", icon: "🔄", saree: true, bp: true },
+  custom: { en: "Custom blouse piece target", gu: "કસ્ટમ બ્લાઉઝ નંગ",            icon: "✂️", saree: true,  bp: true },
+  bponly: { en: "Blouse pieces only",         gu: "ફક્ત બ્લાઉઝ પીસ",             icon: "👚", saree: false, bp: true },
+};
+
+function err(en, gu) { return { error: en, errorGu: gu }; }
+
+function computePlan(totalM, tableM, sareeM, bpM, strat, targetN) {
+  const T = cm(totalM), L = cm(tableM), S = cm(sareeM), B = cm(bpM);
+  const st = STRATS[strat];
+  if (!(T > 0 && L > 0)) return err("Enter fabric length and table length above 0.", "કુલ કાપડ અને ટેબલ લંબાઈ 0 થી વધુ લખો.");
+  if (st.saree && !(S > 0)) return err("Enter a saree cut above 0.", "સાડી કટ 0 થી વધુ લખો.");
+  if (st.bp && !(B > 0)) return err("Enter a blouse cut above 0.", "બ્લાઉઝ કટ 0 થી વધુ લખો.");
+  if (st.saree && S > L) return err("Saree cut is longer than the table.", "સાડી કટ ટેબલ કરતાં લાંબો છે.");
+  if (st.bp && B > L) return err("Blouse cut is longer than the table.", "બ્લાઉઝ કટ ટેબલ કરતાં લાંબો છે.");
+
+  let sarees = 0, bps = 0, note = null;
+  if (strat === "max" || strat === "saree") {
+    sarees = Math.floor(T / S);
+    if (strat === "max") bps = Math.floor((T - sarees * S) / B);
+  } else if (strat === "equal") {
+    sarees = bps = Math.floor(T / (S + B));
+  } else if (strat === "custom") {
+    const want = Math.max(0, Math.floor(Number(targetN) || 0));
+    const maxBp = Math.floor(T / B);
+    bps = Math.min(want, maxBp);
+    if (want > maxBp) note = { en: `Target ${want} is more than the roll allows. Capped at ${maxBp} blouse pieces.`, gu: `ટાર્ગેટ ${want} નંગ શક્ય નથી. વધુમાં વધુ ${maxBp} બ્લાઉઝ પીસ લીધા.` };
+    sarees = Math.floor((T - bps * B) / S);
+  } else if (strat === "bponly") {
+    bps = Math.floor(T / B);
+  }
+  const scrap = T - sarees * S - bps * B;
+  if ((strat === "equal" || strat === "custom") && B > 0 && scrap >= B) {
+    const extraS = S > 0 ? Math.floor(scrap / S) : 0, extraB = Math.floor(scrap / B);
+    const tip = { en: `Leftover ${fmt(scrap)} m could still give ${extraS ? extraS + " more saree(s) or " : ""}${extraB} more blouse piece(s). Not added, to keep this strategy’s rule.`,
+                  gu: `બાકી ${fmt(scrap)} મી.માંથી ${extraS ? extraS + " સાડી અથવા " : ""}${extraB} બ્લાઉઝ પીસ વધુ નીકળી શકે. પદ્ધતિ મુજબ ઉમેર્યા નથી.` };
+    note = note ? { en: note.en + " " + tip.en, gu: note.gu + " " + tip.gu } : tip;
+  }
+
+  // Lay runs: sarees first, then blouse pieces
+  const perRunS = S > 0 ? Math.floor(L / S) : 0;
+  const perRunB = B > 0 ? Math.floor(L / B) : 0;
+  const runs = [];
+  let left = sarees;
+  while (left > 0) { const n = Math.min(perRunS, left); runs.push({ sarees: n, bps: 0 }); left -= n; }
+  let bLeft = bps;
+  if (bLeft > 0) {
+    const last = runs[runs.length - 1];
+    if (strat === "max") {
+      // Original rule: all leftover BPs go on the last run if they fit, else a new run
+      if (last && (L - last.sarees * S) >= bLeft * B) { last.bps = bLeft; bLeft = 0; }
+    } else if (last) {
+      const fit = Math.min(bLeft, Math.floor((L - last.sarees * S) / B));
+      last.bps = fit; bLeft -= fit;
+    }
+    while (bLeft > 0) { const n = Math.min(perRunB, bLeft); runs.push({ sarees: 0, bps: n }); bLeft -= n; }
+  }
+  runs.forEach(r => { r.used = r.sarees * S + r.bps * B; r.idle = L - r.used; });
+  return { T, L, S, B, strat, perRunS, perRunB, sarees, bps, scrap, used: T - scrap, runs, note };
+}
+
+/* ================= UI ================= */
+const $ = id => document.getElementById(id);
+let strat = "max";
+const bi = (en, gu) => `${en}<span class="gu">${gu}</span>`;
+
+function legendHTML(st) {
+  const items = [];
+  if (st.saree) items.push(["saree", "Saree (S)", "સાડી"]);
+  if (st.bp) items.push(["bp", "Blouse piece (BP)", "બ્લાઉઝ પીસ"]);
+  items.push(["idle", "Empty table", "ખાલી ટેબલ"]);
+  items.push(["scrap", "Scrap (waste)", "વેસ્ટેજ"]);
+  return `<ul class="legend" aria-label="Legend">${items.map(([k, en, gu]) => `<li><span class="sw ${k}" aria-hidden="true"></span><span>${en}<span class="gu">${gu}</span></span></li>`).join("")}</ul>`;
+}
+
+function stripHTML(p) {
+  // One strip per distinct run layout; identical consecutive runs are merged with a ×N count
+  const groups = [];
+  p.runs.forEach((r, i) => {
+    const g = groups[groups.length - 1];
+    if (g && g.sarees === r.sarees && g.bps === r.bps) { g.count++; g.to = i + 1; }
+    else groups.push({ ...r, count: 1, from: i + 1, to: i + 1 });
+  });
+  const rows = groups.map(g => {
+    const segs = [];
+    for (let k = 0; k < g.sarees; k++) segs.push(`<div class="seg saree" style="flex:0 0 ${(p.S / p.L) * 100}%">S${k + 1}</div>`);
+    for (let k = 0; k < g.bps; k++) segs.push(`<div class="seg bp" style="flex:0 0 ${(p.B / p.L) * 100}%">${g.bps > 12 ? "" : "BP"}</div>`);
+    const rng = g.from === g.to ? `${g.from}` : `${g.from}–${g.to}`;
+    return `<div class="run-row"><div class="lbl"><span class="times">×${g.count}</span>Run ${rng}<br><span style="font-weight:500">રન ${rng}</span></div><div class="strip" role="img" aria-label="Runs ${rng}, ${g.count} times: ${g.sarees} sarees, ${g.bps} blouse pieces, ${fmt(g.idle)} m empty">${segs.join("")}</div></div>`;
+  });
+  return `<div class="runs">${rows.join("")}</div><div class="scale"><span>0 m</span><span>${fmt(p.L)} m</span></div>`;
+}
+
+function tableHTML(p) {
+  const st = STRATS[p.strat];
+  const groups = [];
+  p.runs.forEach((r, i) => {
+    const g = groups[groups.length - 1];
+    if (g && g.sarees === r.sarees && g.bps === r.bps) { g.count++; g.to = i + 1; }
+    else groups.push({ ...r, count: 1, from: i + 1, to: i + 1 });
+  });
+  const cols = [["Runs", "રન"], ["Lays", "પાથરણી"]];
+  if (st.saree) cols.push(["Sarees / run", "રન દીઠ સાડી"]);
+  if (st.bp) cols.push(["BP / run", "રન દીઠ બ્લાઉઝ"]);
+  if (st.saree) cols.push(["Sarees", "સાડી નંગ"]);
+  if (st.bp) cols.push(["Blouse pieces", "બ્લાઉઝ નંગ"]);
+  cols.push(["Used / run", "રન દીઠ વપરાશ"], ["Empty table / run", "રન દીઠ ખાલી"]);
+  const lab = i => `${cols[i][0]} · ${cols[i][1]}`;
+  const head = `<tr>${cols.map(c => `<th>${bi(c[0], c[1])}</th>`).join("")}</tr>`;
+  const body = groups.map(g => {
+    const cells = [
+      `${g.from === g.to ? `Run ${g.from} · રન ${g.from}` : `Runs ${g.from}–${g.to} · રન ${g.from}–${g.to}`}`,
+      g.count];
+    if (st.saree) cells.push(g.sarees);
+    if (st.bp) cells.push(g.bps);
+    if (st.saree) cells.push(`<b class="t-saree">${g.sarees * g.count}</b>`);
+    if (st.bp) cells.push(`<b class="t-bp">${g.bps * g.count}</b>`);
+    cells.push(`${fmt(g.used)} m`, `${fmt(g.idle)} m`);
+    return `<tr>${cells.map((c, i) => `<td data-label="${lab(i)}">${c}</td>`).join("")}</tr>`;
+  }).join("");
+  const foot = [`Total · કુલ`, p.runs.length];
+  if (st.saree) foot.push("");
+  if (st.bp) foot.push("");
+  if (st.saree) foot.push(`<b class="t-saree">${p.sarees}</b>`);
+  if (st.bp) foot.push(`<b class="t-bp">${p.bps}</b>`);
+  foot.push(`${fmt(p.used)} m`, `<b class="t-scrap">${fmt(p.scrap)} m</b>`);
+  const footLab = i => i === foot.length - 2 ? "Fabric used · વપરાયેલ કાપડ" : i === foot.length - 1 ? "Roll scrap · વેસ્ટેજ" : lab(i);
+  return `<div class="tbl-wrap cards"><table><thead>${head}</thead><tbody>${body}</tbody><tfoot><tr>${foot.map((c, i) => c === "" ? `<td class="blank" data-label="">&nbsp;</td>` : `<td data-label="${footLab(i)}">${c}</td>`).join("")}</tr></tfoot></table></div>`;
+}
+
+function stepsHTML(p) {
+  const groups = [];
+  p.runs.forEach((r, i) => {
+    const g = groups[groups.length - 1];
+    if (g && g.sarees === r.sarees && g.bps === r.bps) { g.count++; } else groups.push({ ...r, count: 1, from: i + 1 });
+  });
+  const out = groups.map(g => {
+    const runEn = g.count > 1 ? `Do ${g.count} runs` : `Do 1 run`;
+    const runGu = g.count > 1 ? `${g.count} વખત પાથરણી કરો` : `1 વખત પાથરણી કરો`;
+    let en, gu;
+    if (g.sarees && g.bps) { en = `${runEn}: lay ${g.sarees} sarees (${fmt(g.sarees * p.S)} m), then ${g.bps} blouse pieces (${fmt(g.bps * p.B)} m) on the same table.`; gu = `${runGu}: પહેલા ${g.sarees} સાડી (${fmt(g.sarees * p.S)} મી.), પછી એ જ ટેબલ પર ${g.bps} બ્લાઉઝ પીસ (${fmt(g.bps * p.B)} મી.).`; }
+    else if (g.bps) { en = `${runEn}: lay ${g.bps} blouse pieces (${fmt(g.used)} m).`; gu = `${runGu}: ${g.bps} બ્લાઉઝ પીસ પાથરો (${fmt(g.used)} મી.).`; }
+    else { en = `${runEn}: lay ${g.sarees} sarees per table (${fmt(g.used)} m).`; gu = `${runGu}: ટેબલ પર ${g.sarees} સાડી પાથરો (${fmt(g.used)} મી.).`; }
+    return `<li>${bi(en, gu)}</li>`;
+  });
+  out.push(`<li class="scrap">${bi(`Keep aside the final scrap: ${fmt(p.scrap)} m (${p.scrap} cm).`, `છેલ્લો વધેલો ટુકડો ${p.scrap} સેન્ટીમીટર (${fmt(p.scrap)} મી.) અલગ રાખો.`)}</li>`);
+  return `<h3 class="sub">${bi("Floor cutting steps", "કટીંગ કરવાનો ક્રમ")}</h3><ol class="steps">${out.join("")}</ol>`;
+}
+
+function renderPlan(p) {
+  const st = STRATS[p.strat];
+  const util = (p.used / p.T * 100).toFixed(2);
+  const stats = [];
+  if (st.saree) stats.push(`<div class="stat saree"><b>${p.sarees}</b><small>${bi(`Sarees · ${fmt(p.S)} m each`, `કુલ સાડી · ${fmt(p.S)} મી.`)}</small></div>`);
+  if (st.bp) stats.push(`<div class="stat bp"><b>${p.bps}</b><small>${bi(`Blouse pieces · ${fmt(p.B)} m`, `કુલ બ્લાઉઝ · ${fmt(p.B)} મી.`)}</small></div>`);
+  stats.push(`<div class="stat"><b>${p.runs.length}</b><small>${bi("Table runs", "ટેબલ રન")}</small></div>`);
+  stats.push(`<div class="stat"><b>${fmt(p.used)}</b><small>${bi(`Metres used · ${util}%`, "વપરાયેલ કાપડ (મી.)")}</small></div>`);
+  stats.push(`<div class="stat scrap"><b>${p.scrap}</b><small>${bi(`cm scrap (${fmt(p.scrap)} m)`, "સેમી. વેસ્ટેજ")}</small></div>`);
+  const note = p.note ? `<div class="note warn">${bi(p.note.en, p.note.gu)}</div>` : "";
+  return `
+    <h2>${st.icon} ${bi(st.en, st.gu)}</h2>
+    ${note}
+    <div class="stats">${stats.join("")}</div>
+    ${legendHTML(st)}
+    ${stripHTML(p)}
+    ${tableHTML(p)}
+    ${stepsHTML(p)}`;
+}
+
+/* ============ ±0.20 m review (read-only, never changes the plan) ============ */
+function renderAnalysis(v) {
+  const st = STRATS[strat];
+  if (!st.saree) return `<p class="muted">${bi("This strategy cuts no sarees, so a saree-length change has no effect.", "આ પદ્ધતિમાં સાડી કપાતી નથી, એટલે સાડી લંબાઈ બદલવાથી ફેર નથી પડતો.")}</p>`;
+  const deltas = [-20, 0, 20];
+  const sv = d => (cm(v.saree) + d) / 100;
+  const rows = deltas.map(d => ({ d, p: computePlan(v.total, v.table, sv(d), v.bp, strat, v.target) }));
+  const base = rows[1].p;
+  if (base.error) return "";
+  const cmp = (a, b, hi) => a === b ? "" : ((a > b) === hi ? "better" : "worse");
+  const tag = d => d === 0 ? "current · હાલ" : d > 0 ? "+0.20" : "−0.20";
+  const cols = [["Saree cut", "સાડી કટ"], ["Sarees / run", "રન દીઠ સાડી"], ["Sarees", "સાડી"]];
+  if (st.bp) cols.push(["Blouse pieces", "બ્લાઉઝ"]);
+  cols.push(["Table runs", "ટેબલ રન"], ["Scrap", "વેસ્ટેજ"]);
+  const lab = i => `${cols[i][0]} · ${cols[i][1]}`;
+  const body = rows.map(({ d, p }) => {
+    if (p.error) return `<tr><td data-label="${lab(0)}">${fmt(cm(v.saree) + d)} m</td><td colspan="${cols.length - 1}">${p.error}</td></tr>`;
+    const c = [`${fmt(p.S)} m (${tag(d)})`, `<span class="${cmp(p.perRunS, base.perRunS, true)}">${p.perRunS}</span>`, `<span class="${cmp(p.sarees, base.sarees, true)}">${p.sarees}</span>`];
+    if (st.bp) c.push(`<span class="${cmp(p.bps, base.bps, true)}">${p.bps}</span>`);
+    c.push(`<span class="${cmp(p.runs.length, base.runs.length, false)}">${p.runs.length}</span>`, `<span class="${cmp(p.scrap, base.scrap, false)}">${fmt(p.scrap)} m</span>`);
+    return `<tr class="${d === 0 ? "current" : ""}">${c.map((x, i) => `<td data-label="${lab(i)}">${x}</td>`).join("")}</tr>`;
+  }).join("");
+
+  const presets = [112, 500, 1000, 6697];
+  const agg = deltas.map(d => {
+    let s = 0, b = 0, sc = 0, r = 0, ok = true;
+    presets.forEach(t => { const p = computePlan(t, v.table, sv(d), v.bp, strat, v.target); if (p.error) ok = false; else { s += p.sarees; b += p.bps; sc += p.scrap; r += p.runs.length; } });
+    return { d, s, b, sc, r, ok };
+  });
+  const aCols = [["Saree cut", "સાડી કટ"], ["Sarees", "સાડી"]];
+  if (st.bp) aCols.push(["Blouse pieces", "બ્લાઉઝ"]);
+  aCols.push(["Table runs", "ટેબલ રન"], ["Total scrap", "કુલ વેસ્ટેજ"]);
+  const aBody = agg.map(a => {
+    const c = [`${fmt(cm(v.saree) + a.d)} m (${tag(a.d)})`, a.ok ? a.s : "–"];
+    if (st.bp) c.push(a.ok ? a.b : "–");
+    c.push(a.ok ? a.r : "–", a.ok ? fmt(a.sc) + " m" : "–");
+    return `<tr class="${a.d === 0 ? "current" : ""}">${c.map((x, i) => `<td data-label="${aCols[i][0]} · ${aCols[i][1]}">${x}</td>`).join("")}</tr>`;
+  }).join("");
+
+  const lo = rows[0].p, hi = rows[2].p;
+  let en, gu;
+  if (!lo.error && lo.sarees > base.sarees) {
+    en = `Cutting 0.20 m shorter (${fmt(lo.S)} m) gives ${lo.sarees - base.sarees} more sarees from this roll. Use it only if ${fmt(lo.S)} m still meets your saree specification, and confirm with a trial lot first. Otherwise keep ${fmt(base.S)} m.`;
+    gu = `0.20 મી. ટૂંકું (${fmt(lo.S)} મી.) કાપવાથી ${lo.sarees - base.sarees} સાડી વધુ મળે. પણ ${fmt(lo.S)} મી. સાડી માન્ય હોય તો જ, અને પહેલા ટ્રાયલ લોટ કરીને. નહીં તો ${fmt(base.S)} મી. જ રાખો.`;
+  } else {
+    en = `A 0.20 m change gives no extra sarees here. Keep ${fmt(base.S)} m.`;
+    gu = `0.20 મી. ફેરફારથી અહીં વધુ સાડી મળતી નથી. ${fmt(base.S)} મી. જ રાખો.`;
+  }
+  if (!hi.error && hi.sarees < base.sarees) { en += ` Cutting 0.20 m longer loses ${base.sarees - hi.sarees} sarees.`; gu += ` 0.20 મી. લાંબું કાપવાથી ${base.sarees - hi.sarees} સાડી ઓછી થાય.`; }
+
+  const th = c => `<tr>${c.map(x => `<th>${bi(x[0], x[1])}</th>`).join("")}</tr>`;
+  return `
+    <div class="tbl-wrap cards"><table><thead>${th(cols)}</thead><tbody>${body}</tbody></table></div>
+    <div class="note">${bi(en, gu)}</div>
+    <h3 class="sub">${bi("All four preset rolls (112, 500, 1000, 6697 m)", "ચારેય તાકા સાથે સરખામણી")}</h3>
+    <div class="tbl-wrap cards"><table><thead>${th(aCols)}</thead><tbody>${aBody}</tbody></table></div>
+    <p class="muted" style="margin-top:12px">Assumptions: lengths in metres; no kerf, shrinkage or defect loss; blouse cut fixed at ${fmt(base.B)} m; sarees and blouse pieces compared by count, not value.</p>`;
+}
+
+function readVals() { return { total: $("total").value, table: $("table").value, saree: $("saree").value, bp: $("bp").value, target: $("target").value }; }
+
+function update() {
+  const v = readVals();
+  const st = STRATS[strat];
+  $("f-saree").hidden = !st.saree;
+  $("f-bp").hidden = !st.bp;
+  $("f-target").hidden = strat !== "custom";
+  const p = computePlan(v.total, v.table, v.saree, v.bp, strat, v.target);
+  $("err").innerHTML = p.error ? bi(p.error, p.errorGu) : "";
+  window.lastPlan = p.error ? null : p;
+  $("plan").innerHTML = p.error ? `<p class="err">${bi(p.error, p.errorGu)}</p>` : renderPlan(p);
+  $("analysis").innerHTML = p.error ? "" : renderAnalysis(v);
+  document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", String(Number(c.dataset.v) === Number(v.total))));
+  document.querySelectorAll(".strat").forEach(b => b.setAttribute("aria-checked", String(b.dataset.s === strat)));
+  try { localStorage.setItem("sareePlanner2", JSON.stringify({ ...v, strat })); } catch (e) {}
+}
+
+/* ---------- WhatsApp share ---------- */
+function shareText(p) {
+  const st = STRATS[p.strat], L = [];
+  L.push("✂️ *Saree cutting plan / સાડી કટીંગ પ્લાન*");
+  L.push(`${st.icon} ${st.en} / ${st.gu}`);
+  L.push("");
+  L.push(`📏 Roll / કુલ કાપડ: ${fmt(p.T)} m`);
+  L.push(`🧾 Table / ટેબલ: ${fmt(p.L)} m`);
+  if (st.saree) L.push(`🥻 Saree cut / સાડી કટ: ${fmt(p.S)} m`);
+  if (st.bp) L.push(`👚 Blouse cut / બ્લાઉઝ કટ: ${fmt(p.B)} m`);
+  L.push("");
+  if (st.saree) L.push(`✅ *Sarees / સાડી: ${p.sarees}*`);
+  if (st.bp) L.push(`✅ *Blouse pieces / બ્લાઉઝ: ${p.bps}*`);
+  L.push(`🔁 Table runs / ટેબલ રન: ${p.runs.length}`);
+  L.push(`📐 Used / વપરાશ: ${fmt(p.used)} m`);
+  L.push(`⚠️ Scrap / વેસ્ટેજ: ${fmt(p.scrap)} m (${p.scrap} cm)`);
+  L.push("");
+  L.push("*Cutting steps / કટીંગ ક્રમ*");
+  const groups = [];
+  p.runs.forEach((r, i) => { const g = groups[groups.length - 1]; if (g && g.sarees === r.sarees && g.bps === r.bps) { g.count++; g.to = i + 1; } else groups.push({ ...r, count: 1, from: i + 1, to: i + 1 }); });
+  groups.forEach((g, i) => {
+    const rng = g.from === g.to ? g.from : `${g.from}–${g.to}`;
+    const what = [g.sarees ? `${g.sarees} saree/સાડી` : "", g.bps ? `${g.bps} BP/બ્લાઉઝ` : ""].filter(Boolean).join(" + ");
+    L.push(`${i + 1}. Run/રન ${rng} (×${g.count}): ${what}`);
+  });
+  L.push(`${groups.length + 1}. Keep scrap aside / વેસ્ટેજ અલગ રાખો: ${p.scrap} cm`);
+  if (p.note) { L.push(""); L.push(`ℹ️ ${p.note.en}`); L.push(p.note.gu); }
+  return L.join("\n");
+}
+$("waBtn").addEventListener("click", () => {
+  const p = window.lastPlan;
+  if (!p) { alert("Fix the inputs first. / પહેલા માપ સુધારો."); return; }
+  const text = shareText(p);
+  // 1) Native share sheet (Android/iOS): pick WhatsApp from the list
+  if (navigator.share) {
+    navigator.share({ title: "Saree cutting plan", text }).catch(err => { if (err && err.name !== "AbortError") openShareBox(text); });
+    return;
+  }
+  // 2) Fallback: copy box + WhatsApp app link
+  openShareBox(text);
+});
+
+function copyText(text) {
+  const ta = $("shareText");
+  const legacy = () => { ta.focus(); ta.select(); try { return document.execCommand("copy"); } catch (e) { return false; } };
+  if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text).then(() => true, legacy);
+  return Promise.resolve(legacy());
+}
+function openShareBox(text) {
+  $("shareText").value = text;
+  $("waApp").href = "whatsapp://send?text=" + encodeURIComponent(text);
+  $("waWeb").href = "https://wa.me/?text=" + encodeURIComponent(text);
+  $("copyMsg").textContent = "";
+  $("shareBox").showModal();
+}
+$("copyBtn").addEventListener("click", () => copyText($("shareText").value).then(ok => {
+  $("copyMsg").innerHTML = ok ? 'Copied. Open WhatsApp and paste.<span class="gu">કૉપી થઇ ગયું. WhatsApp ખોલી પેસ્ટ કરો.</span>' : 'Copy blocked. Long-press the text to copy.<span class="gu">ટેક્સ્ટ પર લાંબું દબાવી કૉપી કરો.</span>';
+}));
+$("closeShare").addEventListener("click", () => $("shareBox").close());
+
+/* ---------- Light / dark toggle ---------- */
+function applyTheme(t) {
+  const root = document.documentElement;
+  const dark = t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.setAttribute("data-theme", dark ? "dark" : "light");
+  $("themeBtn").innerHTML = dark ? '☀️ Light<span class="gu">લાઇટ</span>' : '🌙 Dark<span class="gu">ડાર્ક</span>';
+  $("themeBtn").setAttribute("aria-pressed", String(dark));
+}
+let savedTheme = null;
+try { savedTheme = localStorage.getItem("sareeTheme"); } catch (e) {}
+applyTheme(savedTheme);
+$("themeBtn").addEventListener("click", () => {
+  const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  try { localStorage.setItem("sareeTheme", next); } catch (e) {}
+  applyTheme(next);
+});
+
+// Build strategy picker
+$("strats").innerHTML = Object.entries(STRATS).map(([k, s]) =>
+  `<button type="button" role="radio" class="strat" data-s="${k}" aria-checked="false"><span class="ic" aria-hidden="true">${s.icon}</span><span>${s.en}<span class="gu">${s.gu}</span></span></button>`).join("");
+document.querySelectorAll(".strat").forEach(b => b.addEventListener("click", () => { strat = b.dataset.s; update(); }));
+document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => { $("total").value = c.dataset.v; update(); }));
+["total", "table", "saree", "bp", "target"].forEach(id => $(id).addEventListener("input", update));
+
+try {
+  const s = JSON.parse(localStorage.getItem("sareePlanner2") || "null");
+  if (s) { ["total", "table", "saree", "bp", "target"].forEach(k => { if (s[k]) $(k).value = s[k]; }); if (STRATS[s.strat]) strat = s.strat; }
+} catch (e) {}
+update();
+
+/* ================= PWA hooks ================= */
+
+const PWA_SERVICE_WORKER = true; // enable once sw.js is deployed on HTTPS
+if (PWA_SERVICE_WORKER && "serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+</script>
+
+</body>
+</html>
